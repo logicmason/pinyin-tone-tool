@@ -34,7 +34,7 @@ Examples:
 Clone or download the repository and then install dependencies:
 
 ```bash
-git clone https://github.com/yourusername/pinyin-tone-tool.git
+git clone https://github.com/logicmason/pinyin-tone-tool.git
 cd pinyin-tone-tool
 npm install
 ```
