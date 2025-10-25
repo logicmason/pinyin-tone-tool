@@ -3,7 +3,7 @@
 // Primary utilities: toToneMarks, toToneNumbers
 // Both are heavily tested, but toToneNumbers is partially AI-generated
 // toToneMarks is partially modernized from an ancient, battle-tested version
-// 
+//
 // Copyright Mark Wilbur, MIT License
 
 // ----- Global Constants -----
@@ -58,10 +58,10 @@ function buildSyllablePattern() {
     `(?:zh|ch|sh|[${consonants}])?` +  // optional initial (include r)
     `(?:[iuvü${toneMarkedVowels}])?` +    // optional medial
     `(?:` +
-      // Complex compound finals (longest first)
-      `(?:[${vowels}](?:iang|iong|uang|ueng|ian|iao|ian|ing|ong|ang|eng|ai|ao|ei|ou|an|en|in|un|vn))|` +
-      `(?:[${vowels}](?:i|o|u|ng|n))|` +  // simpler compound finals (ng before n)
-      `(?:[${vowels}])` +                   // single vowels
+    // Complex compound finals (longest first)
+    `(?:[${vowels}](?:iang|iong|uang|ueng|ian|iao|ian|ing|ong|ang|eng|ai|ao|ei|ou|an|en|in|un|vn))|` +
+    `(?:[${vowels}](?:i|o|u|ng|n))|` +  // simpler compound finals (ng before n)
+    `(?:[${vowels}])` +                   // single vowels
     `)` +
     `(?:r(?![a-zü${toneMarkedVowels}]))?`,  // optional erhua (r not followed by vowel)
     'gi'
@@ -98,52 +98,51 @@ function stripTonesAndLowercase(text) {
 function findSyllableBoundaries(text) {
   const boundaries = [];
   const syllablePattern = buildSyllablePattern();
-  
+
   let match;
   while ((match = syllablePattern.exec(text)) !== null) {
     boundaries.push({ start: match.index, end: match.index + match[0].length });
   }
-  
+
   const processedBoundaries = [];
   for (let i = 0; i < boundaries.length; i++) {
     const current = boundaries[i];
     const next = boundaries[i + 1];
-    
+
     processedBoundaries.push(current);
-    
+
     // check if next syllable starts with a/o/e and should be separated
     if (next) {
+      const currentSyllable = text.slice(current.start, current.end);
+      const currentEndsWithConsonant = new RegExp(`[${consonantsEnding}]$`, 'i').test(currentSyllable);
+
       const nextSyllable = text.slice(next.start, next.end);
       const nextStartsWithAOE = new RegExp(`^[${aoeVowels}]`, 'i').test(nextSyllable);
-      
+      const nextStartsWithVowel = new RegExp(`^[${vowels}]`, 'i').test(nextSyllable);
+
       // check if there's already an apostrophe between syllables
       const hasApostrophe = text.slice(current.end, next.start).includes("'");
-      
-      if (nextStartsWithAOE && !hasApostrophe) {
-        // Apply apostrophe rule:the last consonant goes with the next syllable
-        // but only if they're part of the same word (no space between them)
-        const gap = text.slice(current.end, next.start);
-        const isSameWord = !gap.includes(' ');
-        
-        if (isSameWord) {
-          const currentSyllable = text.slice(current.start, current.end);
-          if (currentSyllable.length > 1 && new RegExp(`[${consonantsEnding}]$`, 'i').test(currentSyllable)) {
-            // Adjust current boundary to exclude the last consonant
-            processedBoundaries[processedBoundaries.length - 1] = {
-              start: current.start,
-              end: current.end - 1
-            };
-            // Adjust next boundary to include the consonant
-            boundaries[i + 1] = {
-              start: next.start - 1,
-              end: next.end
-            };
-          }
+
+      const gap = text.slice(current.end, next.start);
+      const hasNoGap = gap.length === 0;
+      const ngFollowedByVowel = currentSyllable.endsWith('ng') && nextStartsWithVowel;
+      if (hasNoGap && (nextStartsWithAOE || ngFollowedByVowel)) {
+        if (currentSyllable.length > 1 && currentEndsWithConsonant) {
+          // Adjust current boundary to exclude the last consonant
+          processedBoundaries[processedBoundaries.length - 1] = {
+            start: current.start,
+            end: current.end - 1
+          };
+          // Adjust next boundary to include the consonant
+          boundaries[i + 1] = {
+            start: next.start - 1,
+            end: next.end
+          };
         }
       }
     }
   }
-  
+
   return processedBoundaries;
 }
 
@@ -170,16 +169,16 @@ function stripToneFromSyllable(syllable) {
 // Does rough check of if a word is clearly non-Pinyin
 function isNonPinyinWord(word) {
   const boundaries = findSyllableBoundaries(word);
-  
+
   // If no syllables were found, it's not pinyin
   if (boundaries.length === 0) { return true; }
-  
+
   const totalSyllableLength =
     boundaries.reduce((sum, b) => sum + (b.end - b.start), 0);
 
   // If the syllables don't cover the entire word, it's not pinyin
   if (totalSyllableLength < word.length) { return true; }
-  
+
   return false;
 }
 
@@ -258,34 +257,42 @@ function toToneMarks(inputText, options = {}) {
 }
 
 function toToneNumbers(text, options = {}) {
-  const { erhuaTone = 'after-r', showNeutralTone = true } = options;
-  const words = text.split(wordSplitPattern);
   if (!text) return text;
+  const { erhuaTone = 'after-r', preserveApostrophes = false, showNeutralTone = true } = options;
+  const words = text.split(wordSplitPattern);
+  let pendingApostrophe = false;
 
   return words.map(word => {
+    // Don't preserve apostrophes for tone numbered pinyin. Only preserve for non-pinyin
+    if (!preserveApostrophes && (word === "'")) {
+      pendingApostrophe = true;
+      return "";
+    }
+
     // Skip non-word characters (spaces, punctuation, etc.) and non-pinyin words
     if (!wordPattern.test(word)) { return word; }
     if (isNonPinyinWord(word)) { return word; }
-    
+
     // Process as Pinyin word
     const boundaries = findSyllableBoundaries(word);
     let result = '';
     let lastBoundaryEnd = 0;
-    
+
     for (const boundary of boundaries) {
-      // Add any non-Pinyin text before this syllable
+      // Add any non-Pinyin text before this syllable (strip apostrophes)
       if (boundary.start > lastBoundaryEnd) {
-        result += word.slice(lastBoundaryEnd, boundary.start);
+        const gap = word.slice(lastBoundaryEnd, boundary.start);
+        result += gap.replace(/'$/, '');
       }
-      
+
       const syllable = word.slice(boundary.start, boundary.end);
       const toneNumber = extractToneNumber(syllable);
       const baseSyllable = stripToneFromSyllable(syllable);
-      
+
       // Handle erhua tone placement
       if (baseSyllable.endsWith('r') && baseSyllable.length > 1) {
         const baseWithoutR = baseSyllable.slice(0, -1);
-        
+
         if (erhuaTone === 'after-r') {
           result += baseWithoutR + 'r' + toneNumber;
         }
@@ -295,19 +302,19 @@ function toToneNumbers(text, options = {}) {
       }
       // Regular syllable - add tone number at the end
       else { result += baseSyllable + toneNumber; }
-      
+
       lastBoundaryEnd = boundary.end;
     }
-    
+
     // Add any remaining non-Pinyin text
     if (lastBoundaryEnd < word.length) {
       result += word.slice(lastBoundaryEnd);
     }
-    
+
     if (!showNeutralTone) {
       result = result.replace(/5/g, '');
     }
-    
+
     return result;
   }).join('');
 }

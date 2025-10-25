@@ -177,6 +177,10 @@ describe('Pinyin Tone Tool', () => {
         expected: "Chéngzhǔ dàren huílái le!"
       },
       {
+        input: "Your Chinese is good, but it isn't as good as Da4shan1's",
+        expected: "Your Chinese is good, but it isn't as good as Dàshān's"
+      },
+      {
         input: "Ta1 de CPzhi2 hen3 gao1.",
         expected: "Tā de CPzhí hěn gāo."
       },
@@ -201,7 +205,7 @@ describe('Pinyin Tone Tool', () => {
     const cases = [
       { input: 'ā á ǎ à', expected: 'a1 a2 a3 a4' },
       { input: 'nǐhǎo', expected: 'ni3hao3' },
-      { input: "Dà'ān Sēnlín Gōngyuán", expected: "Da4'an1 Sen1lin2 Gong1yuan2" },
+      { input: "Dà'ān Sēnlín Gōngyuán", expected: "Da4an1 Sen1lin2 Gong1yuan2" },
     ];
     cases.forEach(({ input, expected }) => {
       const actual = toToneNumbers(input, { showNeutralTone: true });
@@ -243,12 +247,27 @@ describe('Pinyin Tone Tool', () => {
       { input: "hengou", expected: 'hen5gou5' },
       { input: "heng'ou", expected: "heng5'ou5" },
       { input: "nǐmen a", expected: "ni3men5 a5" },
+      { input: "pà'o", expected: "pa4'o5" },
+      { input: "pào", expected: "pao4" },
+    ];
+    cases.forEach(({ input, expected }) => {
+      const actual = toToneNumbers(input, { showNeutralTone: true, preserveApostrophes: true });
+      expect(actual).to.equal(expected);
+    });
+  });
+
+  it('should handle other cases where segmentation is needed', () => {
+    const cases = [
+      { input: "kuānguǎng", expected: "kuan1guang3" },
+      { input: "yíngēn", expected: "yin2gen1" },
+      { input: "yíng'ēn", expected: "ying2en1" },
     ];
     cases.forEach(({ input, expected }) => {
       const actual = toToneNumbers(input, { showNeutralTone: true });
       expect(actual).to.equal(expected);
     });
   });
+
 
   it('should not add tone marks to non-pinyin syllables', () => {
     const cases = [
@@ -272,7 +291,7 @@ describe('Pinyin Tone Tool', () => {
 ...
 
 Shíwǔ nián qián, wǒ qī suì de wàishengnǚ Wáng Qífāng cóng Bōshìdùn jìle yī fēng Yīngwén xìn gěi wǒ, wèn wǒ Fèichéng jiāoqū háoyǔ dáilai de dàshuǐ yǒu méiyou gěi wǒ jiā yǐnqi shénme máfan. Tā yě yāoqǐng wǒ qù Bōshìdùn wánr. Yǐhòu wǒ jīhū měi nián dōu dào Bōshìdùn qù.`,
-        expected: `Bu4jiu3, Liu2 lao3shi1 you4 hui2lai5 le5, hou4mian5 gen1zhe5 Shu4yun4 pang4pang4 de5 wai4po2. Wai4po2 ju3zhe5 la4zhu2, yi1lu4 da4sheng1 de5 du1nang5zhe5 shen2me5. Wo3 gen1 Shu4yun4 xiang4 liang3 ge5 mu4'ou3, bu4 gan3 chu1 yi1 sheng1. Shu4yun4 de5 wai4po2 yong4 Guang3xi1hua4 dui4 wo3men5 shuo1, “Ni3men5 yao4 si3 a5! Da4shui3 ba3 she2 chong1 chu1lai5; ni3men5 bu4 pa4 she2 lai2 yao3si3 ni3men5 a5?”
+        expected: `Bu4jiu3, Liu2 lao3shi1 you4 hui2lai5 le5, hou4mian5 gen1zhe5 Shu4yun4 pang4pang4 de5 wai4po2. Wai4po2 ju3zhe5 la4zhu2, yi1lu4 da4sheng1 de5 du1nang5zhe5 shen2me5. Wo3 gen1 Shu4yun4 xiang4 liang3 ge5 mu4ou3, bu4 gan3 chu1 yi1 sheng1. Shu4yun4 de5 wai4po2 yong4 Guang3xi1hua4 dui4 wo3men5 shuo1, “Ni3men5 yao4 si3 a5! Da4shui3 ba3 she2 chong1 chu1lai5; ni3men5 bu4 pa4 she2 lai2 yao3si3 ni3men5 a5?”
 
 ...
 
