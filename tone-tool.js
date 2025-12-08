@@ -56,8 +56,11 @@ const wordPattern = new RegExp(`^[\\w${toneMarkedVowels}]+$`, 'i');
 function buildSyllablePattern() {
   return new RegExp(
     `(?:zh|ch|sh|[${consonants}])?` +  // optional initial (include r)
-    `(?:[iuvü${toneMarkedVowels}])?` +    // optional medial
+    // Medial: i/u/v/ü or tone-marked versions, but NOT when followed by "ér" (to prevent "ù" from being medial before "ér")
+    `(?:(?![iuvü${toneMarkedVowels}][eēéěèEĒÉĚÈ]r)[iuvü${toneMarkedVowels}])?` +
     `(?:` +
+    // Special case for "er" final (e with tone marks + r) - must come FIRST
+    `(?:[eēéěèEĒÉĚÈ]r)|` +
     // Complex compound finals (longest first)
     `(?:[${vowels}](?:iang|iong|uang|ueng|ian|iao|ian|ing|ong|ang|eng|ai|ao|ei|ou|an|en|in|un|vn))|` +
     `(?:[${vowels}](?:i|o|u|ng|n))|` +  // simpler compound finals (ng before n)

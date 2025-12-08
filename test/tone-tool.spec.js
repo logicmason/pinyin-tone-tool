@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { expect } from 'chai';
-import { toToneMarks, toToneNumbers } from '../tone-tool.js';
+import { toToneMarks, toToneNumbers, findSyllableBoundaries } from '../tone-tool.js';
 
 describe('Pinyin Tone Tool', () => {
   it('should handle an empty string', () => {
@@ -324,6 +324,28 @@ Shi2wu3 nian2 qian2, wo3 qi1 sui4 de5 wai4sheng5nü3 Wang2 Qi2fang1 cong2 Bo1shi
     cases.forEach(({ input, expectedAfter, expectedBefore }) => {
       expect(toToneNumbers(input, { erhuaTone: 'after-r' })).to.equal(expectedAfter);
       expect(toToneNumbers(input, { erhuaTone: 'before-r' })).to.equal(expectedBefore);
+    });
+  });
+
+  it('it should segment properly', () => {
+    const cases = [
+      { input: "kuan1", expected: 
+        [ { start: 0, end: 4 } ]
+       },
+      { input: "kuānguǎng", expected: 
+        [ { start: 0, end: 4 }, { start: 4, end: 9 } ]
+       },
+      { input: "yícù'érjiù", expected: [
+        { start: 0, end: 2 },
+        { start: 2, end: 4 },
+        { start: 5, end: 7 },
+        { start: 7, end: 10 }
+      ] },
+    ];
+
+    cases.forEach(({ input, expected }) => {
+      const actual = findSyllableBoundaries(input);
+      expect(actual).to.deep.equal(expected);
     });
   });
 });

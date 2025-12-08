@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { readFileSync } from 'fs';
-import { toToneMarks } from './tone-tool.js';
+import { toToneMarks } from 'pinyin-tone-tool';
 
 const args = process.argv.slice(2);
 
