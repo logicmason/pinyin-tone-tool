@@ -271,7 +271,7 @@ describe('Pinyin Tone Tool', () => {
 
   it('should not add tone marks to non-pinyin syllables', () => {
     const cases = [
-      { 
+      {
         input: "Wǒmen jīntiān lái jiǎng Google, Facebook lèisì startup de chuàngyè fāngshì.",
         expected: "Wo3men5 jin1tian1 lai2 jiang3 Google, Facebook lei4si4 startup de5 chuang4ye4 fang1shi4.",
       },
@@ -329,11 +329,20 @@ Shi2wu3 nian2 qian2, wo3 qi1 sui4 de5 wai4sheng5nü3 Wang2 Qi2fang1 cong2 Bo1shi
 
   it('it should segment properly', () => {
     const cases = [
-      { input: "kuan1", expected: 
+      { input: "kuan1", expected:
         [ { start: 0, end: 4 } ]
        },
-      { input: "kuānguǎng", expected: 
+      { input: "kuānguǎng", expected:
         [ { start: 0, end: 4 }, { start: 4, end: 9 } ]
+       },
+      { input: "qiènuò", expected:
+        [ { start: 0, end: 3 }, { start: 3, end: 6 } ]
+       },
+      { input: "rǎngāng", expected:
+        [ { start: 0, end: 3 }, { start: 3, end: 7 } ]
+       },
+      { input: "rànglù", expected:
+        [ { start: 0, end: 4 }, { start: 4, end: 6 } ]
        },
       { input: "yícù'érjiù", expected: [
         { start: 0, end: 2 },

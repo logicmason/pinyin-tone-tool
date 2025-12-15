@@ -63,7 +63,9 @@ function buildSyllablePattern() {
     `(?:[eēéěèEĒÉĚÈ]r)|` +
     // Complex compound finals (longest first)
     `(?:[${vowels}](?:iang|iong|uang|ueng|ian|iao|ian|ing|ong|ang|eng|ai|ao|ei|ou|an|en|in|un|vn))|` +
-    `(?:[${vowels}](?:i|o|u|ng|n))|` +  // simpler compound finals (ng before n)
+    // Simpler compound finals: prevent n/ng when followed by a vowel (to prevent "èn" from matching in "qiènuò")
+    `(?:[${vowels}](?:ng(?![${vowels}])|n(?![${vowels}])))|` +  // ng before n, prevent when followed by vowel
+    `(?:[${vowels}](?:i|o|u))|` +  // simpler compound finals without n/ng
     `(?:[${vowels}])` +                   // single vowels
     `)` +
     `(?:r(?![a-zü${toneMarkedVowels}]))?`,  // optional erhua (r not followed by vowel)
