@@ -1,6 +1,6 @@
 {
   "name": "pinyin-tone-tool",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "description": "Converts pinyin with tone numbers to tone marks and vice versa.",
   "main": "tone-tool.js",
