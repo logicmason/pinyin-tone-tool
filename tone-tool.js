@@ -55,20 +55,24 @@ const wordPattern = new RegExp(`^[\\w${toneMarkedVowels}]+$`, 'i');
 
 function buildSyllablePattern() {
   return new RegExp(
-    `(?:zh|ch|sh|[${consonants}])?` +  // optional initial (include r)
-    // Medial: i/u/v/ü or tone-marked versions, but NOT when followed by "ér" (to prevent "ù" from being medial before "ér")
-    `(?:(?![iuvü${toneMarkedVowels}][eēéěèEĒÉĚÈ]r)[iuvü${toneMarkedVowels}])?` +
+    // Optional initial (including r, zh, ch, sh)
+    `(?:zh|ch|sh|[${consonants}])?` +
+    // Optional medial: only plain i/u/ü/v (tone marks never sit on the medial)
+    `(?:[iuvüIUVÜ])?` +
+    // Final (required): try longer, more complex finals first
     `(?:` +
-    // Special case for "er" final (e with tone marks + r) - must come FIRST
-    `(?:[eēéěèEĒÉĚÈ]r)|` +
-    // Complex compound finals (longest first)
-    `(?:[${vowels}](?:iang|iong|uang|ueng|ian|iao|ian|ing|ong|ang|eng|ai|ao|ei|ou|an|en|in|un|vn))|` +
-    // Simpler compound finals: prevent n/ng when followed by a vowel (to prevent "èn" from matching in "qiènuò")
-    `(?:[${vowels}](?:ng(?![${vowels}])|n(?![${vowels}])))|` +  // ng before n, prevent when followed by vowel
-    `(?:[${vowels}](?:i|o|u))|` +  // simpler compound finals without n/ng
-    `(?:[${vowels}])` +                   // single vowels
+    // Standalone "er" syllable: allowed only when the preceding character is NOT a vowel
+    `(?<![${vowels}])[eēéěèEĒÉĚÈ]r|` +
+    `(?:[${vowels}](?:iang|iong|uang|ueng|ian|iao|ing|ong|ang|eng|ai|ao|ei|ou|an|en|in|un|vn))|` +
+    // Simpler compound finals, but don't absorb n/ng when a vowel follows (so "qiènuò" splits as "qiè" + "nuò")
+    `(?:[${vowels}](?:ng(?![${vowels}])|n(?![${vowels}])))|` +
+    // Finals ending in i/o/u (e.g. "ui", "ou", etc.)
+    `(?:[${vowels}](?:i|o|u))|` +
+    // Single-vowel finals
+    `(?:[${vowels}])` +
     `)` +
-    `(?:r(?![a-zü${toneMarkedVowels}]))?`,  // optional erhua (r not followed by vowel)
+    // Erhua: r that is NOT followed by a vowel character; if a vowel follows, r is the next syllable's initial
+    `(?:r(?![a-zü${toneMarkedVowels}]))?`,
     'gi'
   );
 }
