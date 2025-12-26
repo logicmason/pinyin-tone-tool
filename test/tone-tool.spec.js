@@ -261,6 +261,7 @@ describe('Pinyin Tone Tool', () => {
       { input: "kuānguǎng", expected: "kuan1guang3" },
       { input: "yíngēn", expected: "yin2gen1" },
       { input: "yíng'ēn", expected: "ying2en1" },
+      { input: "tǔdòuní", expected: "tu3dou4ni2" },
     ];
     cases.forEach(({ input, expected }) => {
       const actual = toToneNumbers(input, { showNeutralTone: true });

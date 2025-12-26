@@ -54,6 +54,7 @@ const wordPattern = new RegExp(`^[\\w${toneMarkedVowels}]+$`, 'i');
 // ----- Helper Utilities -----
 
 function buildSyllablePattern() {
+  // assumes tone marks are stripped
   return new RegExp(
     // Optional initial (including r, zh, ch, sh)
     `(?:zh|ch|sh|[${consonants}])?` +
@@ -62,8 +63,8 @@ function buildSyllablePattern() {
     // Final (required): try longer, more complex finals first
     `(?:` +
     // Standalone "er" syllable: allowed only when the preceding character is NOT a vowel
-    `(?<![${vowels}])[eēéěèEĒÉĚÈ]r|` +
-    `(?:[${vowels}](?:iang|iong|uang|ueng|ian|iao|ing|ong|ang|eng|ai|ao|ei|ou|an|en|in|un|vn))|` +
+    `(?<![${vowels}])er|` +
+    `(?:iang|iong|uang|ueng|ian|iao|ing|ong|ang|eng|ai|ao|ei|ou)|` +
     // Simpler compound finals, but don't absorb n/ng when a vowel follows (so "qiènuò" splits as "qiè" + "nuò")
     `(?:[${vowels}](?:ng(?![${vowels}])|n(?![${vowels}])))|` +
     // Finals ending in i/o/u (e.g. "ui", "ou", etc.)
@@ -72,7 +73,7 @@ function buildSyllablePattern() {
     `(?:[${vowels}])` +
     `)` +
     // Erhua: r that is NOT followed by a vowel character; if a vowel follows, r is the next syllable's initial
-    `(?:r(?![a-zü${toneMarkedVowels}]))?`,
+    `(?:r(?![a-zü${vowels}]))?`,
     'gi'
   );
 }
@@ -105,11 +106,12 @@ function stripTonesAndLowercase(text) {
 
 // Determines syllable boundaries using pinyin orthography rules
 function findSyllableBoundaries(text) {
+  const normalizedText = stripTonesAndLowercase(text);
   const boundaries = [];
   const syllablePattern = buildSyllablePattern();
 
   let match;
-  while ((match = syllablePattern.exec(text)) !== null) {
+  while ((match = syllablePattern.exec(normalizedText)) !== null) {
     boundaries.push({ start: match.index, end: match.index + match[0].length });
   }
 
@@ -122,17 +124,17 @@ function findSyllableBoundaries(text) {
 
     // check if next syllable starts with a/o/e and should be separated
     if (next) {
-      const currentSyllable = text.slice(current.start, current.end);
+      const currentSyllable = normalizedText.slice(current.start, current.end);
       const currentEndsWithConsonant = new RegExp(`[${consonantsEnding}]$`, 'i').test(currentSyllable);
 
-      const nextSyllable = text.slice(next.start, next.end);
+      const nextSyllable = normalizedText.slice(next.start, next.end);
       const nextStartsWithAOE = new RegExp(`^[${aoeVowels}]`, 'i').test(nextSyllable);
       const nextStartsWithVowel = new RegExp(`^[${vowels}]`, 'i').test(nextSyllable);
 
       // check if there's already an apostrophe between syllables
-      const hasApostrophe = text.slice(current.end, next.start).includes("'");
+      const hasApostrophe = normalizedText.slice(current.end, next.start).includes("'");
 
-      const gap = text.slice(current.end, next.start);
+      const gap = normalizedText.slice(current.end, next.start);
       const hasNoGap = gap.length === 0;
       const ngFollowedByVowel = currentSyllable.endsWith('ng') && nextStartsWithVowel;
       if (hasNoGap && (nextStartsWithAOE || ngFollowedByVowel)) {
@@ -151,7 +153,6 @@ function findSyllableBoundaries(text) {
       }
     }
   }
-
   return processedBoundaries;
 }
 
