@@ -225,6 +225,21 @@ describe('Pinyin Tone Tool', () => {
     });
   });
 
+  it('should handle multi-syllable words with Unicode base vowels (ü) and tone marks', () => {
+    const cases = [
+      { input: 'cèlüè', expected: 'ce4lüe4' },
+      { input: 'lǜsè', expected: 'lü4se4' },
+      { input: 'nǚzhuāng', expected: 'nü3zhuang1' },
+      { input: 'lǚyóu', expected: 'lü3you2' },
+      { input: 'qūyù', expected: 'qu1yu4' },
+    ];
+    cases.forEach(({ input, expected }) => {
+      const actual = toToneNumbers(input);
+      expect(actual).to.equal(expected,
+        `"${input}" should convert to "${expected}" but got "${actual}"`);
+    });
+  });
+
   it('should emit neutral tone 5 when configured', () => {
     const cases = [
       { input: 'de', expected: 'de5' },
