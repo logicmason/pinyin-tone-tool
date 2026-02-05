@@ -47,8 +47,9 @@ const consonantsEnding = 'bcdfghjklmnpqrstvwxyz';
 const vowelsWithNG = 'aeiouvüngrAEIOUVÜNGR';
 
 // Pre-compiled regex patterns
-const wordSplitPattern = new RegExp(`(\\s+|[^\\p{L}${toneMarkedVowels}]+)`, 'u');
-const wordPattern = new RegExp(`^[\\p{L}${toneMarkedVowels}]+$`, 'iu');
+// Use Unicode-aware letters + digits plus explicit tone-marked vowels.
+const wordSplitPattern = new RegExp(`(\\s+|[^\\p{L}\\p{N}${toneMarkedVowels}]+)`, 'u');
+const wordPattern = new RegExp(`^[\\p{L}\\p{N}${toneMarkedVowels}]+$`, 'iu');
 
 
 // ----- Helper Utilities -----
