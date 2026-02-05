@@ -1,6 +1,6 @@
 # Pinyin Tone Tool
 
-A lightweight Node.js utility for converting Pinyin with tone numbers to tone marks (and vice versa).
+A lightweight Node.js utility for converting Pinyin with tone numbers to tone marks (and vice versa). See [online demo](https://imperialexam.com/tone-tool).
 
 The tool provides two primary functions:
 
@@ -11,7 +11,6 @@ For example:
 
 - Converting `"ni3hao3"` yields `"nǐhǎo"`.
 - Converting `"nǐhǎo"` yields `"ni3hao3"`.
-
 
 ## Features
 
@@ -90,9 +89,4 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## Acknowledgments
 
-- Based on the original Pinyin conversion projects.
-- Inspired by the need for simple and lightweight Pinyin processing tools in JavaScript.
-
----
-
-*Happy converting!*
+- This library is based on the original Pinyin conversion projects I wrote for my old blog. Unlike that previous incarnation, they're now a library that can be consumed as an ES module.
