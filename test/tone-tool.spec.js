@@ -336,6 +336,7 @@ Shi2wu3 nian2 qian2, wo3 qi1 sui4 de5 wai4sheng5nü3 Wang2 Qi2fang1 cong2 Bo1shi
       { input: 'huār', expectedAfter: 'huar1', expectedBefore: 'hua1r' },
       { input: 'zhèr', expectedAfter: 'zher4', expectedBefore: 'zhe4r' },
       { input: 'wānr', expectedAfter: 'wanr1', expectedBefore: 'wan1r' },
+      { input: 'jīnrgè', expectedAfter: 'jinr1ge4', expectedBefore: 'jin1rge4' },
     ];
     cases.forEach(({ input, expectedAfter, expectedBefore }) => {
       expect(toToneNumbers(input, { erhuaTone: 'after-r' })).to.equal(expectedAfter);

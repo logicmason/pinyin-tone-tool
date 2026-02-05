@@ -73,7 +73,7 @@ function buildSyllablePattern() {
     `(?:[${vowels}])` +
     `)` +
     // Erhua: r that is NOT followed by a vowel character; if a vowel follows, r is the next syllable's initial
-    `(?:r(?![a-zü${vowels}]))?`,
+    `(?:r(?![${vowels}]))?`,
     'gi'
   );
 }
